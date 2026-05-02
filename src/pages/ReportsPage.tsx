@@ -40,7 +40,16 @@ import { Invoice } from '../types';
 import { X } from 'lucide-react';
 
 export default function ReportsPage() {
-  const { invoices, importBulkData, exportAllData, exportToCSV, businessProfile } = usePlayZone();
+  const { invoices, importBulkData, exportAllData, exportToCSV, businessProfile, isAdmin } = usePlayZone();
+  
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 text-center">
+        <h1 className="text-4xl font-black text-slate-800 italic mb-4">Access Denied 🔒</h1>
+        <p className="text-slate-500 font-medium max-w-md">Only administrators can view financial reports and manage data backups. Please contact your manager if you need access.</p>
+      </div>
+    );
+  }
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInvoiceForReceipt, setSelectedInvoiceForReceipt] = useState<Invoice | null>(null);

@@ -14,6 +14,7 @@ import {
   Instagram
 } from 'lucide-react';
 import { usePlayZone } from '../hooks/usePlayZone';
+import { cn } from '../lib/utils';
 
 interface LoginPageProps {
   onLogin: () => void;

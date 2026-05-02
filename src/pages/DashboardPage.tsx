@@ -249,8 +249,8 @@ export default function DashboardPage() {
               <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
                 <TrendingUp className="text-primary" /> Weekly Revenue
               </h2>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[250px] w-full min-h-[250px] min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <AreaChart data={last7Days}>
                     <defs>
                       <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
@@ -275,8 +275,8 @@ export default function DashboardPage() {
               <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
                 <TrendingUp className="text-blue-500" /> Monthly Trends
               </h2>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[250px] w-full min-h-[250px] min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <BarChart data={monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dy={10} />
@@ -369,8 +369,8 @@ export default function DashboardPage() {
             <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2">
               <PieChart size={20} className="text-accent" /> Revenue Source
             </h2>
-            <div className="h-[200px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[200px] w-full relative min-h-[200px] min-w-0">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={billTypeData} layout="vertical">
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} width={60} />

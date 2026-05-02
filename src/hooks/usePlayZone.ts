@@ -108,7 +108,7 @@ export function usePlayZone() {
       mobile: '9596913030, 9796220727',
       email: 'funky@funky-land.com',
       logo: '🎡',
-      accountingYearStart: '04-01'
+      accountingYearStart: '01-04'
     };
     return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
   });
@@ -258,14 +258,18 @@ export function usePlayZone() {
 
   const getFinancialYear = (date: Date) => {
     const d = new Date(date);
-    const month = d.getMonth() + 1;
+    const [startDay, startMonth] = businessProfile.accountingYearStart.split('-').map(Number);
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
     const year = d.getFullYear();
-    // Indian FY starts April 1st
-    if (month >= 4) {
-      return `${year}-${(year + 1).toString().slice(-2)}`;
+
+    let fyStartYear;
+    if (m > startMonth || (m === startMonth && day >= startDay)) {
+      fyStartYear = year;
     } else {
-      return `${year - 1}-${year.toString().slice(-2)}`;
+      fyStartYear = year - 1;
     }
+    return `${fyStartYear}-${(fyStartYear + 1).toString().slice(-2)}`;
   };
 
   const addInvoice = (invoice: Omit<Invoice, 'id' | 'invoiceNumber'>) => {

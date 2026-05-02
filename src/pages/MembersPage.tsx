@@ -15,10 +15,13 @@ import {
   Upload,
   X,
   MessageCircle,
-  FileText
+  FileText,
+  Printer
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn, formatWhatsAppLink } from '../lib/utils';
+import ThermalReceipt from '../components/ThermalReceipt';
+import { Invoice } from '../types';
 
 export default function MembersPage() {
   const { members, plans, addMember, addInvoice, importBulkData, exportAllData, entries, invoices, exportToCSV, businessProfile } = usePlayZone();
@@ -26,6 +29,7 @@ export default function MembersPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired'>('all');
   const [isAdding, setIsAdding] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   
   const selectedMemberHistory = useMemo(() => {
     if (!selectedMemberId) return { entries: [], invoices: [] };
@@ -465,12 +469,21 @@ export default function MembersPage() {
                     </h4>
                     <div className="space-y-3">
                        {selectedMemberHistory.invoices.length > 0 ? selectedMemberHistory.invoices.map(inv => (
-                         <div key={inv.id} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex justify-between items-center">
+                         <div key={inv.id} className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex justify-between items-center group/inv">
                             <div>
                                <p className="font-black text-slate-800 text-sm italic">{inv.invoiceNumber}</p>
                                <p className="text-[10px] text-emerald-600 font-bold uppercase">{inv.paymentMode} • {new Date(inv.date).toLocaleDateString()}</p>
                             </div>
-                            <span className="font-black text-slate-800">₹{inv.totalAmount}</span>
+                            <div className="flex items-center gap-2">
+                               <button 
+                                 onClick={() => setSelectedInvoice(inv)}
+                                 className="p-2 bg-white text-emerald-600 rounded-lg shadow-sm opacity-0 group-hover/inv:opacity-100 transition-all hover:bg-emerald-600 hover:text-white"
+                                 title="Print Invoice"
+                               >
+                                 <Printer size={14} />
+                               </button>
+                               <span className="font-black text-slate-800">₹{inv.totalAmount}</span>
+                            </div>
                          </div>
                        )) : (
                          <p className="text-xs text-slate-400 italic">No invoices found.</p>
@@ -496,6 +509,40 @@ export default function MembersPage() {
                     Start New Session 🎠
                   </button>
                </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Invoice Modal Overlay */}
+      <AnimatePresence>
+        {selectedInvoice && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedInvoice(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between no-print">
+                <h3 className="text-xl font-black text-slate-800 italic">Subscription Receipt</h3>
+                <button 
+                  onClick={() => setSelectedInvoice(null)}
+                  className="p-2 hover:bg-slate-100 rounded-xl transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <ThermalReceipt invoice={selectedInvoice} />
+              </div>
             </motion.div>
           </div>
         )}

@@ -270,7 +270,7 @@ export default function AccountingPage() {
               <PieChart className="text-primary" /> Revenue Mix
             </h2>
             <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <RePieChart>
                   <Pie
                     data={pieData}

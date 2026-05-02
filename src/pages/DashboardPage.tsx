@@ -133,6 +133,39 @@ export default function DashboardPage() {
 
   const lastInvoice = invoices.length > 0 ? invoices[invoices.length - 1] : null;
 
+  const slides = [
+    {
+      title: "Summer Play Pass",
+      subtitle: "Unlimited Fun All Summer",
+      color: "from-orange-400 to-rose-400",
+      icon: "☀️",
+      action: "Explore Plans"
+    },
+    {
+      title: "Birthday Bonanza",
+      subtitle: "Book now for special discounts",
+      color: "from-purple-500 to-indigo-500",
+      icon: "🎂",
+      action: "View Calendar"
+    },
+    {
+       title: "New Member Rewards",
+       subtitle: "Earn points on every visit",
+       color: "from-emerald-400 to-teal-500",
+       icon: "⭐️",
+       action: "Learn More"
+    }
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % slides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
   return (
     <div className="space-y-10 pb-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -171,6 +204,53 @@ export default function DashboardPage() {
           )}
         </div>
       </header>
+
+      {/* Featured Slider */}
+      <div className="relative h-48 sm:h-56 md:h-64 w-full rounded-[3rem] overflow-hidden shadow-2xl shadow-slate-200">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={cn(
+              "absolute inset-0 bg-gradient-to-br p-8 md:p-12 flex items-center justify-between",
+              slides[currentSlide].color
+            )}
+          >
+             <div className="space-y-4 max-w-lg z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest">
+                   {slides[currentSlide].icon} Featured Promotion
+                </div>
+                <div>
+                   <h2 className="text-3xl md:text-5xl font-black text-white italic tracking-tight">{slides[currentSlide].title}</h2>
+                   <p className="text-white/80 font-bold italic md:text-lg">{slides[currentSlide].subtitle}</p>
+                </div>
+                <button className="px-6 py-3 bg-white text-slate-900 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all">
+                  {slides[currentSlide].action}
+                </button>
+             </div>
+             
+             <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none translate-x-10 translate-y-10">
+                <span className="text-[15rem] leading-none select-none">{slides[currentSlide].icon}</span>
+             </div>
+          </motion.div>
+        </AnimatePresence>
+        
+        {/* Indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentSlide(i)}
+              className={cn(
+                "h-1.5 rounded-full transition-all",
+                currentSlide === i ? "w-8 bg-white" : "w-1.5 bg-white/40"
+              )}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* Quick Actions Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

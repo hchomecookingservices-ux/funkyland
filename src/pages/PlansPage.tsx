@@ -238,6 +238,27 @@ export default function PlansPage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Grace Period (Min)</label>
+                <input 
+                  type="number" required
+                  value={tempBusinessProfile.gracePeriodMinutes || 0}
+                  onChange={e => setTempBusinessProfile({...tempBusinessProfile, gracePeriodMinutes: parseInt(e.target.value)})}
+                  className="w-full px-5 py-3 bg-slate-50 border-2 border-transparent focus:border-blue-200 focus:bg-white rounded-2xl outline-none font-bold placeholder:text-slate-300"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Overtime Rate (₹/Min)</label>
+                <input 
+                  type="number" required
+                  value={tempBusinessProfile.overtimeRatePerMinute || 0}
+                  onChange={e => setTempBusinessProfile({...tempBusinessProfile, overtimeRatePerMinute: parseFloat(e.target.value)})}
+                  className="w-full px-5 py-3 bg-slate-50 border-2 border-transparent focus:border-blue-200 focus:bg-white rounded-2xl outline-none font-bold placeholder:text-slate-300"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Accounting Year Start (DD-MM)</label>
               <div className="relative">

@@ -16,10 +16,45 @@ import ThermalReceipt from '../components/ThermalReceipt';
 import { Invoice } from '../types';
 
 export default function TrackingPage() {
-  const { entries, invoices, completeEntry } = usePlayZone();
+  const { entries, invoices, completeEntry, plans, businessProfile } = usePlayZone();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('active');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [now, setNow] = useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const calculateOvertime = (entry: any) => {
+    const plan = plans.find(p => p.id === entry.planId);
+    if (!plan || plan.durationMinutes === 0) return { overtimeMinutes: 0, overtimeAmount: 0 };
+
+    const startTime = new Date(entry.startTime);
+    let endTime = entry.endTime ? new Date(entry.endTime) : now;
+    
+    // Cap end time at midnight of the same day if not completed during business hours
+    const midnight = new Date(startTime);
+    midnight.setHours(23, 59, 59, 999);
+    if (endTime > midnight) {
+      endTime = midnight;
+    }
+
+    const diffMs = endTime.getTime() - startTime.getTime();
+    const elapsedMinutes = Math.floor(diffMs / 60000);
+    
+    const overtimeMinutes = Math.max(0, elapsedMinutes - plan.durationMinutes);
+    if (overtimeMinutes > (businessProfile.gracePeriodMinutes || 10)) {
+      const extraMinutes = overtimeMinutes - (businessProfile.gracePeriodMinutes || 10);
+      return { 
+        overtimeMinutes, 
+        overtimeAmount: extraMinutes * (businessProfile.overtimeRatePerMinute || 2) 
+      };
+    }
+    
+    return { overtimeMinutes: 0, overtimeAmount: 0 };
+  };
 
   const handlePrintReceipt = (invoiceId?: string) => {
     if (!invoiceId) return;
@@ -123,6 +158,30 @@ export default function TrackingPage() {
                     <span>• In: {new Date(entry.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     {entry.endTime && <span>• Out: {new Date(entry.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
                   </div>
+                  {entry.status === 'active' && (
+                    <div className="mt-2 flex items-center gap-2">
+                       <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden max-w-[200px]">
+                          <motion.div 
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500",
+                              calculateOvertime(entry).overtimeMinutes > 0 ? "bg-red-500" : "bg-emerald-500"
+                            )}
+                            initial={{ width: 0 }}
+                            animate={{ 
+                              width: `${Math.min(100, (Math.floor((now.getTime() - new Date(entry.startTime).getTime())/60000) / (plans.find(p => p.id === entry.planId)?.durationMinutes || 60)) * 100)}%` 
+                            }}
+                          />
+                       </div>
+                       <span className={cn(
+                         "text-[10px] font-black uppercase tracking-widest",
+                         calculateOvertime(entry).overtimeMinutes > 0 ? "text-red-500" : "text-slate-400"
+                       )}>
+                         {calculateOvertime(entry).overtimeMinutes > 0 
+                           ? `Overtime: ${calculateOvertime(entry).overtimeMinutes}m` 
+                           : `${Math.floor((now.getTime() - new Date(entry.startTime).getTime())/60000)}m elapsed`}
+                       </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -144,7 +203,18 @@ export default function TrackingPage() {
                       <Phone size={20} />
                     </button>
                     <button 
-                      onClick={() => completeEntry(entry.id)}
+                      onClick={() => {
+                        const { overtimeAmount } = calculateOvertime(entry);
+                        if (overtimeAmount > 0) {
+                          if (confirm(`Charge extra ₹${overtimeAmount} for overtime?`)) {
+                            completeEntry(entry.id, overtimeAmount);
+                          } else {
+                            completeEntry(entry.id, 0);
+                          }
+                        } else {
+                          completeEntry(entry.id, 0);
+                        }
+                      }}
                       className="flex-1 md:flex-none px-8 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-xl"
                     >
                       <CheckCircle2 size={18} />
@@ -154,7 +224,12 @@ export default function TrackingPage() {
                 )}
                 
                 {entry.status === 'completed' && (
-                   <p className="font-black text-slate-400 px-4 italic text-sm">{formatCurrency(entry.amount)} Total Paid</p>
+                   <div className="text-right">
+                      <p className="font-black text-slate-400 italic text-sm">{formatCurrency(entry.amount)} Base</p>
+                      {entry.overtimeAmount !== undefined && entry.overtimeAmount > 0 && (
+                        <p className="font-black text-red-500 italic text-sm">+ {formatCurrency(entry.overtimeAmount)} Overtime</p>
+                      )}
+                   </div>
                 )}
               </div>
             </motion.div>

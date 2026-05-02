@@ -24,7 +24,7 @@ import { Invoice, InvoiceItem, GSTSlab } from '../types';
 import ThermalReceipt from '../components/ThermalReceipt';
 
 export default function BillingPage() {
-  const { addEntry, addInvoice, plans, socksConfig, businessProfile, members, staff, invoices } = usePlayZone();
+  const { addEntry, addInvoice, addMember, plans, socksConfig, businessProfile, members, staff, invoices } = usePlayZone();
   const navigate = useNavigate();
   
   const [handledBy, setHandledBy] = useState(staff[0]?.id || '');
@@ -38,7 +38,8 @@ export default function BillingPage() {
     mediumSocks: 0,
     planId: plans[0]?.id || '',
     description: '',
-    isGstInclusive: true
+    isGstInclusive: true,
+    registerAsMember: false
   });
 
   // Auto-populate based on phone number
@@ -216,8 +217,26 @@ export default function BillingPage() {
       personCount: formData.personCount,
       smallSocksCount: formData.smallSocks,
       mediumSocksCount: formData.mediumSocks,
-      invoiceId: newInvoice.id
+      invoiceId: newInvoice.id,
+      memberId: formData.registerAsMember ? formData.customerId : undefined
     });
+
+    // 3. Register as member if requested
+    if (formData.registerAsMember) {
+      const isAlreadyMember = members.some(m => m.phoneNumber === formData.mobileNo);
+      if (!isAlreadyMember) {
+        addMember({
+          parentName: formData.name,
+          childName: formData.name,
+          childAge: 5, // Default or prompt? simplified to 5 for now
+          phoneNumber: formData.mobileNo,
+          planId: selectedPlan.id,
+          startDate: new Date(),
+          expiryDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+          customerId: formData.customerId
+        });
+      }
+    }
     
     setIsSuccess(true);
   };
@@ -239,14 +258,47 @@ export default function BillingPage() {
             <CheckCircle2 size={48} />
           </motion.div>
           <h2 className="text-3xl font-black text-slate-800 mb-2">Checkout Complete! 🥳</h2>
-          <p className="text-slate-500 font-medium italic mb-8">Session is now active and invoice generated.</p>
+          <p className="text-slate-500 font-medium italic mb-2">Session is now active and invoice generated.</p>
+          <div className="bg-slate-100 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">
+            Entry Time: {new Date().toLocaleTimeString()}
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl overflow-hidden">
-               <ThermalReceipt invoice={lastInvoice} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+            <div className="space-y-4">
+              <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl overflow-hidden">
+                 <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6 border-b pb-4 flex items-center gap-2">
+                   <Receipt size={16} className="text-emerald-500" /> Payment Receipt
+                 </h4>
+                 <ThermalReceipt invoice={lastInvoice} />
+              </div>
             </div>
             
-            <div className="space-y-4 flex flex-col justify-center">
+            <div className="space-y-4 flex flex-col justify-start">
+               <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm mb-4">
+                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Entry Detail</h4>
+                  <div className="space-y-2">
+                     <div className="flex justify-between">
+                        <span className="text-slate-500 text-xs font-bold uppercase">Kid Name</span>
+                        <span className="text-slate-800 text-sm font-black italic">{formData.name}</span>
+                     </div>
+                     <div className="flex justify-between">
+                        <span className="text-slate-500 text-xs font-bold uppercase">Plan</span>
+                        <span className="text-slate-800 text-sm font-black italic">{selectedPlan?.name}</span>
+                     </div>
+                     <div className="flex justify-between">
+                        <span className="text-slate-500 text-xs font-bold uppercase">Time In</span>
+                        <span className="text-emerald-600 text-sm font-black italic">{new Date().toLocaleTimeString()}</span>
+                     </div>
+                  </div>
+               </div>
+
+               <button 
+                onClick={() => window.print()}
+                className="w-full py-5 bg-white text-slate-800 font-black text-sm rounded-3xl border-2 border-slate-100 hover:bg-slate-50 transition-all flex items-center justify-center gap-3 uppercase tracking-widest shadow-xl shadow-slate-200/40"
+              >
+                <CheckCircle2 size={20} className="text-emerald-500" />
+                Print Confirmation
+              </button>
                <button 
                 onClick={handleWhatsAppNotify}
                 className="w-full py-5 bg-emerald-50 text-emerald-600 font-black text-sm rounded-3xl border-2 border-emerald-100 hover:bg-emerald-100 transition-all flex items-center justify-center gap-3 uppercase tracking-widest shadow-xl shadow-emerald-600/5"
@@ -379,6 +431,20 @@ export default function BillingPage() {
                   placeholder="9876543210"
                   className="w-full px-5 py-3 bg-slate-50 border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-2xl transition-all outline-none font-medium"
                 />
+              </div>
+              <div className="md:col-span-2 py-2">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input 
+                    type="checkbox"
+                    checked={formData.registerAsMember}
+                    onChange={e => setFormData({...formData, registerAsMember: e.target.checked})}
+                    className="w-6 h-6 rounded-lg border-2 border-slate-200 checked:bg-primary accent-primary"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-black text-slate-700 uppercase tracking-tight">Save as Member</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Enable to store customer data for future visits</span>
+                  </div>
+                </label>
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">No. of Person</label>

@@ -20,6 +20,7 @@ export default function ThermalReceipt({ invoice }: ThermalReceiptProps) {
   const smallSocks = invoice.items.find(i => i.id === 'SOCKS-S');
   const mediumSocks = invoice.items.find(i => i.id === 'SOCKS-M');
   const socksCost = (smallSocks?.amount || 0) + (mediumSocks?.amount || 0);
+  const overtimeAmount = invoice.overtimeAmount || 0;
 
   // Categorize GST for breakdown
   const gstBreakdown = invoice.items.reduce((acc, item) => {
@@ -106,11 +107,11 @@ export default function ThermalReceipt({ invoice }: ThermalReceiptProps) {
           )}
           <div className="flex justify-between">
             <span>Extra Charges:</span>
-            <span>0.00</span>
+            <span>{overtimeAmount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between font-bold border-t border-slate-200 pt-1">
             <span>Subtotal:</span>
-            <span>{planItem?.amount.toFixed(2) || '0.00'}</span>
+            <span>{((planItem?.amount || 0) + socksCost + overtimeAmount).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span>Socks Cost:</span>
@@ -131,7 +132,7 @@ export default function ThermalReceipt({ invoice }: ThermalReceiptProps) {
           </div>
           <div className="flex justify-between text-[11px] font-black border-t border-slate-900 pt-1">
             <span>Grand Total:</span>
-            <span>{invoice.totalAmount.toFixed(2)}</span>
+            <span>{(invoice.totalAmount + overtimeAmount).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-[8px]">
             <span>Discount:</span>
@@ -139,7 +140,7 @@ export default function ThermalReceipt({ invoice }: ThermalReceiptProps) {
           </div>
           <div className="flex justify-between font-bold">
             <span>Paid Amount:</span>
-            <span>{invoice.totalAmount.toFixed(2)}</span>
+            <span>{(invoice.totalAmount + overtimeAmount).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-red-600 font-bold text-[8px]">
             <span>Balance:</span>

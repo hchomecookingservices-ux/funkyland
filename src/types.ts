@@ -40,6 +40,7 @@ export interface PlayEntry {
   smallSocksCount: number;
   mediumSocksCount: number;
   invoiceId?: string;
+  overtimeAmount?: number;
 }
 
 export interface Member {
@@ -118,6 +119,7 @@ export interface Invoice {
   paymentMode: 'cash' | 'upi' | 'card' | 'split';
   status: 'paid' | 'pending';
   type: 'walking' | 'member' | 'event';
+  overtimeAmount?: number;
 }
 
 export interface SocksConfig {
@@ -136,6 +138,8 @@ export interface BusinessProfile {
   email: string;
   logo: string;
   accountingYearStart: string; // e.g., "04-01"
+  gracePeriodMinutes: number;
+  overtimeRatePerMinute: number;
 }
 
 export interface CatalogueCategory {

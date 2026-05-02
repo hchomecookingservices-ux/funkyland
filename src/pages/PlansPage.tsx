@@ -36,7 +36,8 @@ export default function PlansPage() {
     staff,
     addStaff,
     updateStaff,
-    deleteStaff
+    deleteStaff,
+    isAdmin
   } = usePlayZone();
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingStaff, setIsAddingStaff] = useState(false);
@@ -45,20 +46,22 @@ export default function PlansPage() {
   const [tempBusinessProfile, setTempBusinessProfile] = useState<BusinessProfile>(businessProfile);
 
   const [staffFormData, setStaffFormData] = useState({
+    id: '',
     name: '',
     role: 'cashier' as any,
     phone: '',
+    password: '',
     status: 'active' as any
   });
 
   const handleStaffSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     addStaff({
       ...staffFormData,
-      joinedDate: new Date().toISOString()
     });
     setIsAddingStaff(false);
-    setStaffFormData({ name: '', role: 'cashier', phone: '', status: 'active' });
+    setStaffFormData({ id: '', name: '', role: 'cashier', phone: '', password: '', status: 'active' });
   };
 
   React.useEffect(() => {
@@ -123,13 +126,15 @@ export default function PlansPage() {
           <h1 className="text-3xl font-black text-slate-800 tracking-tight italic">Plan Management ⚙️</h1>
           <p className="text-slate-500 font-medium">Configure play packages and memberships</p>
         </div>
-        <button 
-          onClick={() => setIsAdding(true)}
-          className="inline-flex items-center gap-2 px-6 py-4 gradient-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-        >
-          <Plus size={20} />
-          ADD PLAN
-        </button>
+        {isAdmin && (
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="inline-flex items-center gap-2 px-6 py-4 gradient-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+          >
+            <Plus size={20} />
+            ADD PLAN
+          </button>
+        )}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -144,13 +149,15 @@ export default function PlansPage() {
               <div className="p-3 bg-slate-50 rounded-xl">
                 <Tag size={20} className="text-primary" />
               </div>
-              <button 
-                onClick={() => deletePlan(plan.id)}
-                className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                title="Delete Plan"
-              >
-                <Trash2 size={18} />
-              </button>
+              {isAdmin && (
+                <button 
+                  onClick={() => deletePlan(plan.id)}
+                  className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                  title="Delete Plan"
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
             </div>
 
             <div className="space-y-1 mb-6">
@@ -274,13 +281,15 @@ export default function PlansPage() {
               <p className="text-[9px] text-slate-400 px-1 font-bold italic">Invoices will reset every year on this date (e.g. 01-04 for April 1st)</p>
             </div>
 
-            <button 
-              type="submit"
-              className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
-            >
-              <Save size={18} />
-              Update Profile
-            </button>
+            {isAdmin && (
+              <button 
+                type="submit"
+                className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs"
+              >
+                <Save size={18} />
+                Update Profile
+              </button>
+            )}
           </form>
         </div>
 
@@ -297,13 +306,15 @@ export default function PlansPage() {
                 <p className="text-slate-400 font-medium text-xs">Manage team access & roles</p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsAddingStaff(true)}
-              className="flex items-center gap-2 px-5 py-3 bg-emerald-500 text-white font-black rounded-xl text-[9px] uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all shrink-0"
-            >
-              <Plus size={16} />
-              New Member
-            </button>
+            {isAdmin && (
+              <button 
+                onClick={() => setIsAddingStaff(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-emerald-500 text-white font-black rounded-xl text-[9px] uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all shrink-0"
+              >
+                <Plus size={16} />
+                New Member
+              </button>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -315,10 +326,10 @@ export default function PlansPage() {
                   </div>
                   <div>
                     <h4 className="font-black text-slate-800 text-sm leading-tight italic">{s.name}</h4>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.role} • {s.phone}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.id} • {s.role} • {s.phone}</p>
                   </div>
                 </div>
-                {staff.length > 1 && (
+                {isAdmin && staff.length > 1 && (
                   <button 
                     onClick={() => deleteStaff(s.id)}
                     className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -479,6 +490,29 @@ export default function PlansPage() {
               </div>
 
               <form onSubmit={handleStaffSubmit} className="space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Staff ID</label>
+                    <input 
+                      type="text" required
+                      value={staffFormData.id}
+                      onChange={e => setStaffFormData({...staffFormData, id: e.target.value})}
+                      placeholder="e.g. STF02"
+                      className="w-full px-5 py-3 bg-slate-50 border-2 border-transparent focus:border-emerald-200 focus:bg-white rounded-2xl outline-none font-bold"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Login Password</label>
+                    <input 
+                      type="password" required
+                      value={staffFormData.password}
+                      onChange={e => setStaffFormData({...staffFormData, password: e.target.value})}
+                      placeholder="••••••••"
+                      className="w-full px-5 py-3 bg-slate-50 border-2 border-transparent focus:border-emerald-200 focus:bg-white rounded-2xl outline-none font-bold"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Full Name</label>
                   <input 

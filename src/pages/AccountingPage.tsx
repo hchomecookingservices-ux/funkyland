@@ -35,7 +35,7 @@ import {
 } from 'recharts';
 
 export default function AccountingPage() {
-  const { invoices, expenses, addExpense, exportToCSV } = usePlayZone();
+  const { invoices, expenses, addExpense, exportToCSV, isAdmin } = usePlayZone();
   const [activeTab, setActiveTab ] = useState<'invoices' | 'expenses'>('invoices');
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddingExpense, setIsAddingExpense] = useState(false);
@@ -126,20 +126,24 @@ export default function AccountingPage() {
           >
             <FileText size={20} />
           </button>
-          <button 
-            onClick={handleExportGSTR1}
-            className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 text-slate-600 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all font-xs"
-          >
-            <Download size={20} />
-            Excel
-          </button>
-          <button 
-            onClick={() => setIsAddingExpense(true)}
-            className="flex items-center gap-2 px-6 py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all font-xs"
-          >
-            <Plus size={20} />
-            Expense
-          </button>
+          {isAdmin && (
+            <>
+              <button 
+                onClick={handleExportGSTR1}
+                className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 text-slate-600 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all font-xs"
+              >
+                <Download size={20} />
+                Excel
+              </button>
+              <button 
+                onClick={() => setIsAddingExpense(true)}
+                className="flex items-center gap-2 px-6 py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all font-xs"
+              >
+                <Plus size={20} />
+                Expense
+              </button>
+            </>
+          )}
         </div>
       </header>
 

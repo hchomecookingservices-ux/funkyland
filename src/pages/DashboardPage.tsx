@@ -108,13 +108,15 @@ export default function DashboardPage() {
       color: 'bg-accent',
       trend: '+12% from avg'
     },
-    { 
-      label: 'Today Revenue', 
-      value: formatCurrency(todayRevenue), 
-      icon: Wallet, 
-      color: 'bg-primary',
-      trend: `${todayInvoices.length} check-ins`
-    },
+    ...(isAdmin ? [
+      { 
+        label: 'Today Revenue', 
+        value: formatCurrency(todayRevenue), 
+        icon: Wallet, 
+        color: 'bg-primary',
+        trend: `${todayInvoices.length} check-ins`
+      }
+    ] : []),
     { 
       label: 'Socks Sold', 
       value: (todaySocks.small + todaySocks.medium).toString(), 
@@ -324,53 +326,55 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Charts Section */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                <TrendingUp className="text-primary" /> Weekly Revenue
-              </h2>
-              <div className="h-[250px] w-full min-h-[250px] min-w-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                  <AreaChart data={last7Days}>
-                    <defs>
-                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#FF6F61" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#FF6F61" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dx={-10} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#1E293B', color: '#fff' }}
-                      itemStyle={{ color: '#FF6F61', fontWeight: 900 }}
-                    />
-                    <Area type="monotone" dataKey="revenue" stroke="#FF6F61" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+          {isAdmin && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                  <TrendingUp className="text-primary" /> Weekly Revenue
+                </h2>
+                <div className="h-[250px] w-full min-h-[250px] min-w-0">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <AreaChart data={last7Days}>
+                      <defs>
+                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#FF6F61" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#FF6F61" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dx={-10} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#1E293B', color: '#fff' }}
+                        itemStyle={{ color: '#FF6F61', fontWeight: 900 }}
+                      />
+                      <Area type="monotone" dataKey="revenue" stroke="#FF6F61" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            </div>
 
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-              <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                <TrendingUp className="text-blue-500" /> Monthly Trends
-              </h2>
-              <div className="h-[250px] w-full min-h-[250px] min-w-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                  <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dx={-10} />
-                    <Tooltip 
-                      cursor={{fill: '#F8FAFC', radius: 10}}
-                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#1E293B', color: '#fff' }}
-                    />
-                    <Bar dataKey="revenue" fill="#5C5CFE" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                  <TrendingUp className="text-blue-500" /> Monthly Trends
+                </h2>
+                <div className="h-[250px] w-full min-h-[250px] min-w-0">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <BarChart data={monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} dx={-10} />
+                      <Tooltip 
+                        cursor={{fill: '#F8FAFC', radius: 10}}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#1E293B', color: '#fff' }}
+                      />
+                      <Bar dataKey="revenue" fill="#5C5CFE" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
@@ -444,32 +448,34 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
-            <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2">
-              <PieChart size={20} className="text-accent" /> Revenue Source
-            </h2>
-            <div className="h-[200px] w-full relative min-h-[200px] min-w-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                <BarChart data={billTypeData} layout="vertical">
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} width={60} />
-                  <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ borderRadius: '16px', border: 'none', background: '#1E293B', color: '#fff' }}
-                  />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                    {billTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={['#FF6F61', '#5C5CFE', '#FFB800'][index % 3]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          {isAdmin && (
+            <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
+              <h2 className="text-lg font-black text-white mb-6 flex items-center gap-2">
+                <PieChart size={20} className="text-accent" /> Revenue Source
+              </h2>
+              <div className="h-[200px] w-full relative min-h-[200px] min-w-0">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                  <BarChart data={billTypeData} layout="vertical">
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} width={60} />
+                    <Tooltip 
+                      cursor={{fill: 'transparent'}}
+                      contentStyle={{ borderRadius: '16px', border: 'none', background: '#1E293B', color: '#fff' }}
+                    />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                      {billTypeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={['#FF6F61', '#5C5CFE', '#FFB800'][index % 3]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="text-xs text-slate-400 font-medium leading-relaxed italic border-l-2 border-slate-700 pl-4 py-1 mt-4">
+                Real-time breakdown of your income streams based on customer type.
+              </p>
             </div>
-            <p className="text-xs text-slate-400 font-medium leading-relaxed italic border-l-2 border-slate-700 pl-4 py-1 mt-4">
-              Real-time breakdown of your income streams based on customer type.
-            </p>
-          </div>
+          )}
         </div>
       </div>
 

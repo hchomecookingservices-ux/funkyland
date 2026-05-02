@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { formatCurrency, cn } from '../lib/utils';
 
 export default function ServicesPage() {
-  const { categories, services, addCategory, addService, deleteService } = usePlayZone();
+  const { categories, services, addCategory, addService, deleteService, isAdmin } = usePlayZone();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | 'all'>('all');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -61,22 +61,24 @@ export default function ServicesPage() {
           <h1 className="text-3xl font-black text-slate-800 tracking-tight italic">Services & Amenities 🎈</h1>
           <p className="text-slate-500 font-medium">Manage add-ons, food, and decoration services</p>
         </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => setIsAddingCategory(true)}
-            className="px-6 py-4 bg-white border border-slate-100 text-slate-600 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2"
-          >
-            <Layers size={20} />
-            Add Category
-          </button>
-          <button 
-            onClick={() => setIsAddingService(true)}
-            className="px-6 py-4 gradient-secondary text-white font-black rounded-2xl shadow-xl shadow-secondary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-          >
-            <Plus size={20} />
-            Add Service
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setIsAddingCategory(true)}
+              className="px-6 py-4 bg-white border border-slate-100 text-slate-600 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2"
+            >
+              <Layers size={20} />
+              Add Category
+            </button>
+            <button 
+              onClick={() => setIsAddingService(true)}
+              className="px-6 py-4 gradient-secondary text-white font-black rounded-2xl shadow-xl shadow-secondary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Add Service
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -147,12 +149,14 @@ export default function ServicesPage() {
                     </td>
                     <td className="px-8 py-5 text-right font-black text-secondary">{formatCurrency(service.price)}</td>
                     <td className="px-8 py-5 text-center">
-                      <button 
-                        onClick={() => deleteService(service.id)}
-                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      {isAdmin && (
+                        <button 
+                          onClick={() => deleteService(service.id)}
+                          className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

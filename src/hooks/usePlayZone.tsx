@@ -31,6 +31,7 @@ interface PlayZoneContextType {
   socksConfig: SocksConfig;
   businessProfile: BusinessProfile;
   staff: StaffMember[];
+  currentUser: StaffMember | null;
   catalogueCategories: CatalogueCategory[];
   catalogueDesigns: CatalogueDesign[];
   addEntry: (entry: Omit<PlayEntry, 'id' | 'startTime' | 'status'>) => void;
@@ -49,9 +50,11 @@ interface PlayZoneContextType {
   deleteService: (id: string) => void;
   updateSocksConfig: (config: SocksConfig) => void;
   updateBusinessProfile: (profile: BusinessProfile) => void;
-  addStaff: (member: Omit<StaffMember, 'id'>) => void;
+  addStaff: (member: Omit<StaffMember, 'id' | 'joinedDate'>) => void;
   updateStaff: (id: string, updates: Partial<StaffMember>) => void;
   deleteStaff: (id: string) => void;
+  login: (id: string, password?: string) => boolean;
+  logout: () => void;
   addCatalogueCategory: (name: string) => void;
   addCatalogueDesign: (design: Omit<CatalogueDesign, 'id'>) => void;
   deleteCatalogueDesign: (id: string) => void;
@@ -64,6 +67,10 @@ const PlayZoneContext = createContext<PlayZoneContextType | undefined>(undefined
 
 export function PlayZoneProvider({ children }: { children: React.ReactNode }) {
   // --- STATE ---
+  const [currentUser, setCurrentUser] = useState<StaffMember | null>(() => {
+    const saved = localStorage.getItem('playzone_user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [entries, setEntries] = useState<PlayEntry[]>(() => {
     const saved = localStorage.getItem('funky_entries');
     if (!saved) return [];
@@ -170,11 +177,12 @@ export function PlayZoneProvider({ children }: { children: React.ReactNode }) {
 
   const [staff, setStaff] = useState<StaffMember[]>(() => {
     const saved = localStorage.getItem('funky_staff');
-    if (!saved) return [{ id: 'STF01', name: 'Admin', role: 'admin', phone: '9999999999', status: 'active', joinedDate: new Date().toISOString() }];
+    if (!saved) return [{ id: 'admin', name: 'Administrator', role: 'admin', phone: '9999999999', password: 'admin', status: 'active', joinedDate: new Date().toISOString() }];
     return JSON.parse(saved);
   });
 
   // Persistence
+  useEffect(() => localStorage.setItem('playzone_user', JSON.stringify(currentUser)), [currentUser]);
   useEffect(() => localStorage.setItem('funky_entries', JSON.stringify(entries)), [entries]);
   useEffect(() => localStorage.setItem('funky_members', JSON.stringify(members)), [members]);
   useEffect(() => localStorage.setItem('funky_events', JSON.stringify(events)), [events]);
@@ -195,7 +203,8 @@ export function PlayZoneProvider({ children }: { children: React.ReactNode }) {
       ...entry,
       id: `ENT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       startTime: new Date(),
-      status: 'active'
+      status: 'active',
+      staffId: currentUser?.id
     };
     setEntries(prev => [newEntry, ...prev]);
   };
@@ -248,13 +257,32 @@ export function PlayZoneProvider({ children }: { children: React.ReactNode }) {
       ...invoice,
       id: `INV-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       invoiceNumber: `FL/${currentFY}/${nextNum.toString().padStart(4, '0')}`,
+      staffId: currentUser?.id
     };
     setInvoices(prev => [newInvoice, ...prev]);
     return newInvoice;
   };
 
+  const login = (id: string, password?: string) => {
+    const found = staff.find(s => s.id.toLowerCase() === id.toLowerCase() && s.password === password && s.status === 'active');
+    if (found) {
+      setCurrentUser(found);
+      localStorage.setItem('playzone_token', 'true');
+      return true;
+    }
+    return false;
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('playzone_token');
+    localStorage.removeItem('playzone_user');
+  };
+
+  const isAdmin = currentUser?.role === 'admin';
+
   const value = {
-    entries, members, events, invoices, expenses, plans, categories, services, socksConfig, businessProfile, staff, catalogueCategories, catalogueDesigns,
+    entries, members, events, invoices, expenses, plans, categories, services, socksConfig, businessProfile, staff, currentUser, isAdmin, catalogueCategories, catalogueDesigns,
     addEntry, completeEntry, addMember, updateMember, deleteMember,
     addEvent: (event: Omit<BookingEvent, 'id'>) => setEvents(prev => [...prev, { ...event, id: `EVT-${Math.random().toString(36).substr(2, 9).toUpperCase()}` }]),
     updateEventStatus: (id: string, status: BookingEvent['status']) => setEvents(prev => prev.map(e => e.id === id ? { ...e, status } : e)),
@@ -267,9 +295,11 @@ export function PlayZoneProvider({ children }: { children: React.ReactNode }) {
     deleteService: (id: string) => setServices(prev => prev.filter(s => s.id !== id)),
     updateSocksConfig: setSocksConfig,
     updateBusinessProfile: setBusinessProfile,
-    addStaff: (member: Omit<StaffMember, 'id'>) => setStaff(prev => [...prev, { ...member, id: 'STF' + (prev.length + 1).toString().padStart(2, '0') }]),
+    addStaff: (member: Omit<StaffMember, 'id' | 'joinedDate'>) => setStaff(prev => [...prev, { ...member, id: member.id || 'STF' + (prev.length + 1).toString().padStart(2, '0'), joinedDate: new Date().toISOString() }]),
     updateStaff: (id: string, updates: Partial<StaffMember>) => setStaff(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s)),
     deleteStaff: (id: string) => setStaff(prev => prev.filter(s => s.id !== id)),
+    login,
+    logout,
     addCatalogueCategory: (name: string) => setCatalogueCategories(prev => [...prev, { id: 'CCAT' + Math.random().toString(36).substr(2, 5).toUpperCase(), name }]),
     addCatalogueDesign: (design: Omit<CatalogueDesign, 'id'>) => setCatalogueDesigns(prev => [...prev, { ...design, id: 'DSGN' + Math.random().toString(36).substr(2, 5).toUpperCase() }]),
     deleteCatalogueDesign: (id: string) => setCatalogueDesigns(prev => prev.filter(d => d.id !== id)),

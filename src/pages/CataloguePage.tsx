@@ -21,7 +21,8 @@ export default function CataloguePage() {
     catalogueDesigns, 
     addCatalogueCategory, 
     addCatalogueDesign, 
-    deleteCatalogueDesign 
+    deleteCatalogueDesign,
+    isAdmin
   } = usePlayZone();
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -83,22 +84,24 @@ export default function CataloguePage() {
           <h1 className="text-3xl font-black text-slate-800 tracking-tight italic">Design Catalogue 🎨</h1>
           <p className="text-slate-500 font-medium">Showcase and manage party themes & decoration designs</p>
         </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => setIsAddingCategory(true)}
-            className="px-6 py-4 bg-white border border-slate-100 text-slate-600 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2"
-          >
-            <PlusCircle size={20} />
-            Add Category
-          </button>
-          <button 
-            onClick={() => setIsAddingDesign(true)}
-            className="px-6 py-4 gradient-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-          >
-            <Plus size={20} />
-            Add Design
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setIsAddingCategory(true)}
+              className="px-6 py-4 bg-white border border-slate-100 text-slate-600 font-black rounded-2xl shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2"
+            >
+              <PlusCircle size={20} />
+              Add Category
+            </button>
+            <button 
+              onClick={() => setIsAddingDesign(true)}
+              className="px-6 py-4 gradient-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <Plus size={20} />
+              Add Design
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm">
@@ -181,12 +184,14 @@ export default function CataloguePage() {
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                    <button 
-                      onClick={() => deleteCatalogueDesign(design.id)}
-                      className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-red-500 transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    {isAdmin && (
+                      <button 
+                        onClick={() => deleteCatalogueDesign(design.id)}
+                        className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white hover:bg-red-500 transition-all"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="p-6 space-y-2">
@@ -246,12 +251,14 @@ export default function CataloguePage() {
                       {design.price ? `₹${design.price}` : '-'}
                     </td>
                     <td className="px-8 py-4 text-right">
-                      <button 
-                        onClick={() => deleteCatalogueDesign(design.id)}
-                        className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      {isAdmin && (
+                        <button 
+                          onClick={() => deleteCatalogueDesign(design.id)}
+                          className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -24,10 +24,10 @@ import { Invoice, InvoiceItem, GSTSlab } from '../types';
 import ThermalReceipt from '../components/ThermalReceipt';
 
 export default function BillingPage() {
-  const { addEntry, addInvoice, addMember, plans, socksConfig, businessProfile, members, staff, invoices } = usePlayZone();
+  const { addEntry, addInvoice, addMember, plans, socksConfig, businessProfile, members, staff, invoices, currentUser } = usePlayZone();
   const navigate = useNavigate();
   
-  const [handledBy, setHandledBy] = useState(staff[0]?.id || '');
+  const [handledBy, setHandledBy] = useState(currentUser?.id || staff[0]?.id || '');
   
   const [formData, setFormData] = useState({
     customerId: 'CU' + Math.floor(Math.random() * 90000 + 10000),

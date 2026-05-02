@@ -41,6 +41,7 @@ export interface PlayEntry {
   mediumSocksCount: number;
   invoiceId?: string;
   overtimeAmount?: number;
+  staffId?: string;
 }
 
 export interface Member {
@@ -120,6 +121,7 @@ export interface Invoice {
   status: 'paid' | 'pending';
   type: 'walking' | 'member' | 'event';
   overtimeAmount?: number;
+  staffId?: string;
 }
 
 export interface SocksConfig {
@@ -172,6 +174,7 @@ export interface StaffMember {
   name: string;
   role: StaffRole;
   phone: string;
+  password?: string;
   status: 'active' | 'inactive';
   joinedDate: any;
 }

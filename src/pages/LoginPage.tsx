@@ -22,21 +22,26 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
-  const { businessProfile } = usePlayZone();
+  const { businessProfile, login } = usePlayZone();
   const [showPassword, setShowPassword] = useState(false);
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(false);
+    
     setTimeout(() => {
-      if (userId && password) {
+      const success = login(userId, password);
+      if (success) {
         onLogin();
       } else {
         setIsLoading(false);
+        setError(true);
       }
     }, 800);
   };
@@ -205,6 +210,16 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 </button>
             </div>
           </div>
+
+          {error && (
+            <motion.p 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-500 text-[11px] font-black uppercase text-center w-full"
+            >
+              Invalid ID or Password
+            </motion.p>
+          )}
 
           <div className="flex items-center justify-between px-2 pt-2">
             <label className="flex items-center gap-2 cursor-pointer group">

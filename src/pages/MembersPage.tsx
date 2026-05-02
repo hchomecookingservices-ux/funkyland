@@ -24,7 +24,7 @@ import ThermalReceipt from '../components/ThermalReceipt';
 import { Invoice } from '../types';
 
 export default function MembersPage() {
-  const { members, plans, addMember, addInvoice, importBulkData, exportAllData, entries, invoices, exportToCSV, businessProfile } = usePlayZone();
+  const { members, plans, addMember, addInvoice, importBulkData, exportAllData, entries, invoices, exportToCSV, businessProfile, isAdmin } = usePlayZone();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired'>('all');
   const [isAdding, setIsAdding] = useState(false);
@@ -180,25 +180,29 @@ export default function MembersPage() {
           >
             <FileText size={18} />
           </button>
-          <label className="hidden sm:flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:bg-slate-50 transition-all font-black text-slate-600 cursor-pointer text-xs">
-            <Upload size={18} />
-            Import
-            <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-          </label>
-          <button 
-            onClick={handleExportMembers}
-            className="hidden sm:flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:bg-slate-50 transition-all font-black text-slate-600 text-xs"
-          >
-            <Download size={18} />
-            Excel
-          </button>
-          <button 
-            onClick={() => setIsAdding(true)}
-            className="inline-flex items-center gap-2 px-6 py-4 gradient-secondary text-white font-black rounded-2xl shadow-xl shadow-secondary/20 hover:scale-105 active:scale-95 transition-all text-sm"
-          >
-            <Plus size={20} />
-            Add Member
-          </button>
+          {isAdmin && (
+            <>
+              <label className="hidden sm:flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:bg-slate-50 transition-all font-black text-slate-600 cursor-pointer text-xs">
+                <Upload size={18} />
+                Import
+                <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+              </label>
+              <button 
+                onClick={handleExportMembers}
+                className="hidden sm:flex items-center gap-2 px-6 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:bg-slate-50 transition-all font-black text-slate-600 text-xs"
+              >
+                <Download size={18} />
+                Excel
+              </button>
+              <button 
+                onClick={() => setIsAdding(true)}
+                className="inline-flex items-center gap-2 px-6 py-4 gradient-secondary text-white font-black rounded-2xl shadow-xl shadow-secondary/20 hover:scale-105 active:scale-95 transition-all text-sm"
+              >
+                <Plus size={20} />
+                Add Member
+              </button>
+            </>
+          )}
         </div>
       </header>
 

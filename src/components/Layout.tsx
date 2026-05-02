@@ -20,7 +20,7 @@ import { cn } from '../lib/utils';
 import { usePlayZone } from '../hooks/usePlayZone';
 
 export default function Layout() {
-  const { businessProfile } = usePlayZone();
+  const { businessProfile, isAdmin, logout } = usePlayZone();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const navigate = useNavigate();
 
@@ -31,15 +31,17 @@ export default function Layout() {
     { to: '/members', icon: Users, label: 'Members' },
     { to: '/services', icon: Layers, label: 'Services' },
     { to: '/catalogue', icon: Image, label: 'Catalogue' },
-    { to: '/reports', icon: BarChart3, label: 'Reports' },
-    { to: '/plans', icon: Settings, label: 'Settings & Plans' },
     { to: '/calendar', icon: Calendar, label: 'Events' },
-    { to: '/accounting', icon: Receipt, label: 'Accounting' },
+    ...(isAdmin ? [
+      { to: '/reports', icon: BarChart3, label: 'Reports' },
+      { to: '/plans', icon: Settings, label: 'Settings & Plans' },
+      { to: '/accounting', icon: Receipt, label: 'Accounting' },
+    ] : []),
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('playzone_token');
-    window.location.href = '/login';
+    logout();
+    navigate('/login');
   };
 
   return (
